@@ -119,13 +119,19 @@
     _callbackId = command.callbackId;
 
     NSArray* arguments            = [command arguments];
-    NSString* content             = [arguments objectAtIndex:0];
     self.settings                 = [arguments objectAtIndex:1];
 
     UIPrintInteractionController* controller = [self printController];
-
     [self adjustPrintController:controller withSettings:self.settings];
-    [self loadContent:content intoPrintController:controller];
+
+    bool rollPaper = [self.settings objectForKey:@"rollPaper"];
+    if (rollPaper) {
+        NSArray* images = [arguments objectAtIndex:0];
+        [self loadImages:images intoPrintController:controller];
+    } else {
+        NSString* content = [arguments objectAtIndex:0];
+        [self loadContent:content intoPrintController:controller];
+    }
 
 }
 

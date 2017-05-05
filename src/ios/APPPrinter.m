@@ -22,6 +22,41 @@
 #import "APPPrinter.h"
 #import <Cordova/CDVAvailability.h>
 
+
+
+@interface LabelPrintPageRenderer : UIPrintPageRenderer { NSMutableArray *imagesToPrint; }
+@property (readwrite, retain) NSMutableArray *imagesToPrint;
+@end
+
+@implementation LabelPrintPageRenderer
+@synthesize imagesToPrint;
+
+// This code always draws one image at print time.
+- (NSInteger)numberOfPages { return [imagesToPrint count]; }
+
+- (void)drawPageAtIndex:(NSInteger)pageIndex inRect:(CGRect)printableRect {
+    
+    if(self.imagesToPrint) {
+        
+        CGSize finalSize =  CGSizeMake(4.1 * 72.0, 1.1 * 72.0);
+        int x = 5;
+        int y = 2.5;
+        
+        CGRect finalRect = CGRectMake(x, y, finalSize.width, finalSize.height);
+        
+        UIImage *image = [self.imagesToPrint objectAtIndex:pageIndex];
+        [image drawInRect:finalRect];
+        
+    }else {
+        NSLog(@"%s No image to draw!", __func__);
+    }
+}
+@end
+
+
+
+
+
 @interface APPPrinter ()
 
 @property (retain) NSString* callbackId;
@@ -34,6 +69,18 @@
 
 #pragma mark -
 #pragma mark Interface
+
+- (UIPrintPaper *)printInteractionController:(UIPrintInteractionController *)printInteractionController
+                                 choosePaper:(NSArray<UIPrintPaper *> *)paperList {
+    
+    CGSize size = CGSizeMake(1.1 * 72.0, 4.1 * 72.0);
+    return [UIPrintPaper bestPaperForPageSize:size withPapersFromArray: paperList];
+}
+
+- (CGFloat)printInteractionController:(UIPrintInteractionController *)printInteractionController
+                    cutLengthForPaper:(UIPrintPaper *)paper {
+    return 72 * 4.1;
+}
 
 /*
  * Checks if the printing service is available.
@@ -357,6 +404,33 @@
         [page loadHTMLString:content baseURL:baseURL];
     }
 
+    controller.printPageRenderer = renderer;
+}
+
+
+- (void) loadImages:(NSArray*)images intoPrintController:(UIPrintInteractionController*)controller
+{
+    UIWebView* page                 = [[UIWebView alloc] init];
+    LabelPrintPageRenderer* renderer   = [[LabelPrintPageRenderer alloc] init];
+    UIViewPrintFormatter* formatter = [page viewPrintFormatter];
+    
+    [renderer addPrintFormatter:formatter startingAtPageAtIndex:0];
+    
+    page.delegate = self;
+    
+    NSMutableArray * imagesArray = [[NSMutableArray alloc] init];
+    for (int i = 0; i < images.count; i++) {
+        NSURL *url = [NSURL URLWithString: [images objectAtIndex:i]];
+        NSData *imageData = [NSData dataWithContentsOfURL:url];
+        UIImage *image = [UIImage imageWithData:imageData];
+        [imagesArray addObject:image];
+    }
+    renderer.imagesToPrint = imagesArray;
+    
+    NSURL *url = [NSURL URLWithString: [images objectAtIndex:0]];
+    [page loadRequest:[NSURLRequest requestWithURL:url]];
+    //[page loadHTMLString:content baseURL:baseURL];
+    
     controller.printPageRenderer = renderer;
 }
 

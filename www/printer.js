@@ -33,6 +33,7 @@ exports.getDefaults = function () {
         duplex:    'none',
         landscape: false,
         graystyle: false,
+        rollPaper: false,
         // iOS specific
         border:    true,
         hidePageRange:      false,
@@ -102,10 +103,10 @@ exports.print = function (content, options, callback, scope) {
         params = options || {},
         fn     = this._createCallbackFn(callback);
 
-    if (typeof page != 'string') {
-        console.log('Print function requires an HTML string. Not an object');
-        return;
-    }
+    // if (typeof page != 'string') {
+    //     console.log('Print function requires an HTML string. Not an object');
+    //     return;
+    // }
 
     if (typeof params == 'string') {
         params = { name: params };

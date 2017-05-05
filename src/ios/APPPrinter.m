@@ -179,6 +179,8 @@
     NSArray* bounds = [self.settings objectForKey:@"bounds"];
     CGRect rect     = [self convertIntoRect:bounds];
 
+    // Set the controller's delegate so the PrintController methods will now fire
+    controller.delegate = self;
     [self presentPrintController:controller fromRect:rect];
 }
 

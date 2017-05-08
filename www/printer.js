@@ -40,7 +40,8 @@ exports.getDefaults = function () {
         hideNumberOfCopies: false,
         hidePaperFormat:    false,
         // iPad specific
-        bounds:    [40, 30, 0, 0]
+        bounds: [40, 30, 0, 0],
+        pageSize: [4.1, 1.14]
     };
 };
 

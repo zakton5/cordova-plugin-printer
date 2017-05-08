@@ -26,10 +26,12 @@
 
 @interface LabelPrintPageRenderer : UIPrintPageRenderer { NSMutableArray *imagesToPrint; }
 @property (readwrite, retain) NSMutableArray *imagesToPrint;
+@property (readwrite, retain) NSMutableArray *labelSize;
 @end
 
 @implementation LabelPrintPageRenderer
 @synthesize imagesToPrint;
+@synthesize labelSize;
 
 // This code always draws one image at print time.
 - (NSInteger)numberOfPages { return [imagesToPrint count]; }
@@ -38,7 +40,7 @@
     
     if(self.imagesToPrint) {
         
-        CGSize finalSize =  CGSizeMake(4.1 * 72.0, 1.1 * 72.0);
+        CGSize finalSize = CGSizeMake([[self.labelSize objectAtIndex:0]doubleValue] * 72.0, [[self.labelSize objectAtIndex:1]doubleValue] * 72.0);
         int x = 5;
         int y = 2.5;
         
@@ -73,13 +75,14 @@
 - (UIPrintPaper *)printInteractionController:(UIPrintInteractionController *)printInteractionController
                                  choosePaper:(NSArray<UIPrintPaper *> *)paperList {
     
-    CGSize size = CGSizeMake(1.1 * 72.0, 4.1 * 72.0);
+    CGSize size = CGSizeMake([[[self.settings objectForKey:@"pageSize"] objectAtIndex:0]doubleValue] * 72.0, [[[self.settings objectForKey:@"pageSize"] objectAtIndex:1]doubleValue] * 72.0);
+
     return [UIPrintPaper bestPaperForPageSize:size withPapersFromArray: paperList];
 }
 
 - (CGFloat)printInteractionController:(UIPrintInteractionController *)printInteractionController
                     cutLengthForPaper:(UIPrintPaper *)paper {
-    return 72 * 4.1;
+    return [[[self.settings objectForKey:@"pageSize"] objectAtIndex:0]doubleValue] * 72.0;
 }
 
 /*
@@ -434,10 +437,10 @@
         [imagesArray addObject:image];
     }
     renderer.imagesToPrint = imagesArray;
+    renderer.labelSize = [self.settings objectForKey:@"pageSize"];
     
     NSURL *url = [NSURL URLWithString: [images objectAtIndex:0]];
     [page loadRequest:[NSURLRequest requestWithURL:url]];
-    //[page loadHTMLString:content baseURL:baseURL];
     
     controller.printPageRenderer = renderer;
 }
